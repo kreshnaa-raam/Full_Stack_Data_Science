@@ -37,13 +37,13 @@ categorical_cols = ['UniqueCarrier', 'Origin', 'Dest', 'Day_of_Week', 'year', 'm
 
 
 # Store predictors and target in two different variables
-def split_train_data(data):
+def split_data(data):
     y = data['dep_delayed_15min']
     X = data.drop('dep_delayed_15min', axis=1)
     return X, y
 
 
-X, y = split_train_data(train)
+X, y = split_data(train)
 
 # Apply train test split with 25% data for validation
 X_train, X_validation, y_train, y_validation = train_test_split(X, y, test_size=0.25)
@@ -79,23 +79,25 @@ hyper_param_grid = {'classifier__n_estimators': n_estimators,
                     'classifier__min_samples_split': min_samples_split}
 
 # Set grid search using roc_auc optimization with 3 fold cv
-CV = GridSearchCV(classifier_pipe, hyper_param_grid, n_jobs=-1, scoring='roc_auc', verbose=2, cv=3)
+rf_CV = GridSearchCV(classifier_pipe, hyper_param_grid, n_jobs=-1, scoring='roc_auc', verbose=2, cv=3)
 
 # fit the model
-CV.fit(X_train, y_train)
+rf_CV.fit(X_train, y_train)
 
 # Predict on validation data and generate scores
 target_names = y_validation.unique().astype(str)
-y_pred = CV.predict(X_validation)
+y_pred = rf_CV.predict(X_validation)
 print(classification_report(y_validation, y_pred, target_names=target_names))
-print("Cross - Validation: ", CV.best_score_)
-print("Validation: ", CV.score(X_validation, y_validation))
+print("Cross - Validation: ", rf_CV.best_score_)
+print("Validation: ", rf_CV.score(X_validation, y_validation))
 
-print('Reading test df')
+# Import test data
 test = pd.read_csv(path + "airline_delay_test - airline_delay_test_new.csv")
 test = date_features(test)
-X, y = split_train_data(test)
-print("Test Score: ", CV.score(X, y))
+X, y = split_data(test)
+
+# Check test performance
+print("Test Score: ", rf_CV.score(X, y))
 
 # export model as pickle file
-pickle.dump(CV, open('model_randomForest_v1.sav', 'wb'))
+pickle.dump(rf_CV, open('model_randomForest_v1.sav', 'wb'))
