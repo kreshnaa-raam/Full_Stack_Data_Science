@@ -4,7 +4,6 @@ import pandas as pd
 import category_encoders as cat_enc
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.impute import SimpleImputer
 from sklearn.metrics import classification_report
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
@@ -28,6 +27,7 @@ def date_features(data):
     data['DepTime'] = pd.to_datetime(data['DepTime'], format='%H:%M').dt.time
     return data
 
+
 # Apply FE on train data
 train = date_features(train)
 
@@ -35,11 +35,13 @@ train = date_features(train)
 numerical_cols = ['Distance']
 categorical_cols = ['UniqueCarrier', 'Origin', 'Dest', 'Day_of_Week', 'year', 'month', 'day', 'hour', 'minutes']
 
+
 # Store predictors and target in two different variables
 def split_train_data(data):
     y = data['dep_delayed_15min']
     X = data.drop('dep_delayed_15min', axis=1)
     return X, y
+
 
 X, y = split_train_data(train)
 
@@ -63,7 +65,7 @@ preprocess = ColumnTransformer(
 classifier_pipe = Pipeline(steps=[('preprocessor', preprocess),
                                   ('classifier', RandomForestClassifier())])
 
-# Set hyperparameter index
+# Set hyper parameter index
 # Number of trees in random forest
 n_estimators = [int(x) for x in np.linspace(start=200, stop=1000, num=3)]
 # Maximum number of levels in tree
@@ -71,10 +73,10 @@ max_depth = [int(x) for x in np.linspace(10, 20, num=3)]
 # Minimum number of samples required to split a node
 min_samples_split = [10, 20]
 
-# Create hyperparameter grid for CV Search for best model
+# Create hyper parameter grid for CV Search for best model
 hyper_param_grid = {'classifier__n_estimators': n_estimators,
-               'classifier__max_depth': max_depth,
-               'classifier__min_samples_split': min_samples_split}
+                    'classifier__max_depth': max_depth,
+                    'classifier__min_samples_split': min_samples_split}
 
 # Set grid search using roc_auc optimization with 3 fold cv
 CV = GridSearchCV(classifier_pipe, hyper_param_grid, n_jobs=-1, scoring='roc_auc', verbose=2, cv=3)
@@ -86,14 +88,14 @@ CV.fit(X_train, y_train)
 target_names = y_validation.unique().astype(str)
 y_pred = CV.predict(X_validation)
 print(classification_report(y_validation, y_pred, target_names=target_names))
-print("{}{}".format("Cross - Validation: ", CV.best_score_))
-print("{}{}".format("Validation: ", CV.score(X_validation, y_validation)))
-
+print("Cross - Validation: ", CV.best_score_)
+print("Validation: ", CV.score(X_validation, y_validation))
 
 print('Reading test df')
 test = pd.read_csv(path + "airline_delay_test - airline_delay_test_new.csv")
 test = date_features(test)
 X, y = split_train_data(test)
-print("{}{}".format("Holdout: ", CV.score(X,y)))
+print("Test Score: ", CV.score(X, y))
 
+# export model as pickle file
 pickle.dump(CV, open('model_randomForest_v1.sav', 'wb'))
