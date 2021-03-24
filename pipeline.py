@@ -38,15 +38,15 @@ categorical_cols = ['UniqueCarrier', 'Origin', 'Dest', 'Day_of_Week', 'year', 'm
 
 # Store predictors and target in two different variables
 def split_data(data):
-    y = data['dep_delayed_15min']
+    Y = data['dep_delayed_15min']
     X = data.drop('dep_delayed_15min', axis=1)
-    return X, y
+    return X, Y
 
 
-X, y = split_data(train)
+X, Y = split_data(train)
 
 # Apply train test split with 25% data for validation
-X_train, X_validation, y_train, y_validation = train_test_split(X, y, test_size=0.25)
+X_train, X_validation, y_train, y_validation = train_test_split(X, Y, test_size=0.25)
 
 # Creating ss transformer to scale the continuous numerical data with StandardScaler()
 numerical_transformer = Pipeline(steps=[('ss', StandardScaler())])
