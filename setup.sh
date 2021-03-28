@@ -3,7 +3,7 @@ reinstall_docker_nginx=true
 configure_nginx=true
 kill_docker_images=false
 
-LISTEN=143.110.246.42:80
+LISTEN=165.232.176.57
 SERVER_NAME=localhost
 
 # Arrays
@@ -11,7 +11,7 @@ declare -a LOCATIONS=("/webapp")
 declare -a PROXIES=("http://localhost:5000/")
 declare -a image_name=("fsds")
 declare -a image_version=("1.0")
-declare -a ports=("5001:5001")
+declare -a ports=("5000:5000")
 
 #-------------------------------------------------
 

@@ -10,6 +10,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 import pickle
+import joblib
 
 # Import data
 path = "/Users/kreshnaa.raam/Documents/DR_Projects/FSDS/"
@@ -99,5 +100,7 @@ X, y = split_data(test)
 # Check test performance
 print("Test Score: ", rf_CV.score(X, y))
 
+
 # export model as pickle file
 pickle.dump(rf_CV, open('model_randomForest_v1.sav', 'wb'))
+
