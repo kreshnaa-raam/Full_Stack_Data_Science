@@ -32,6 +32,7 @@ def date_features(data):
 # Apply FE on train data
 train = date_features(train)
 
+
 # Assign numeric and categorical variable list
 numerical_cols = ['Distance']
 categorical_cols = ['UniqueCarrier', 'Origin', 'Dest', 'Day_of_Week', 'year', 'month', 'day', 'hour', 'minutes']
@@ -66,41 +67,24 @@ preprocess = ColumnTransformer(
 classifier_pipe = Pipeline(steps=[('preprocessor', preprocess),
                                   ('classifier', RandomForestClassifier())])
 
-# Set hyper parameter index
-# Number of trees in random forest
-n_estimators = [int(x) for x in np.linspace(start=200, stop=1000, num=3)]
-# Maximum number of levels in tree
-max_depth = [int(x) for x in np.linspace(10, 20, num=3)]
-# Minimum number of samples required to split a node
-min_samples_split = [10, 20]
+param_grid = {'classifier__n_estimators': [400]}
 
-# Create hyper parameter grid for CV Search for best model
-hyper_param_grid = {'classifier__n_estimators': n_estimators,
-                    'classifier__max_depth': max_depth,
-                    'classifier__min_samples_split': min_samples_split}
 
 # Set grid search using roc_auc optimization with 3 fold cv
-rf_CV = GridSearchCV(classifier_pipe, hyper_param_grid, n_jobs=-1, scoring='roc_auc', verbose=2, cv=3)
+rf_CV = GridSearchCV(classifier_pipe,
+                     param_grid = param_grid,
+                     n_jobs=-1,
+                     scoring='roc_auc',
+                     verbose=2,
+                     cv=3)
 
 # fit the model
-rf_CV.fit(X_train, y_train)
+model = rf_CV.fit(X_train, y_train)
 
-# Predict on validation data and generate scores
-target_names = y_validation.unique().astype(str)
-y_pred = rf_CV.predict(X_validation)
-print(classification_report(y_validation, y_pred, target_names=target_names))
-print("Cross - Validation: ", rf_CV.best_score_)
-print("Validation: ", rf_CV.score(X_validation, y_validation))
-
-# Import test data
-test = pd.read_csv(path + "airline_delay_test - airline_delay_test_new.csv")
-test = date_features(test)
-X, y = split_data(test)
-
-# Check test performance
-print("Test Score: ", rf_CV.score(X, y))
-
-
-# export model as pickle file
-pickle.dump(rf_CV, open('model_randomForest_v1.sav', 'wb'))
+#Saving the model with pickle
+import pickle
+# save the model to disk
+model_name  = 'model.pkl'
+pickle.dump(model, open(model_name, 'wb'))
+print("[INFO]: Finished saving model...")
 
