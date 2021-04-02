@@ -4,7 +4,7 @@ import pickle
 import pandas as pd
 
 app = Flask(__name__)
-model = pickle.load(open('custom.pkl', 'rb'))
+model = pickle.load(open('customf.pkl', 'rb'))
 
 
 def preprocess_features(X):
@@ -12,10 +12,10 @@ def preprocess_features(X):
 
     # Preprocess FlightDate
     X['FlightDate'] = pd.to_datetime(X['FlightDate'])
-    X['FlightDate_Year'] = X['FlightDate'].dt.year
-    X['FlightDate_Month'] = X['FlightDate'].dt.month
-    X['FlightDate_Day'] = X['FlightDate'].dt.day
-
+    X['Day_of_Week'] = X['FlightDate'].dt.day_name
+    X['day'] = X['FlightDate'].dt.day
+    X['month'] = X['FlightDate'].dt.month
+    X['year'] = X['FlightDate'].dt.year
     X = X.drop('FlightDate', axis=1)
     #X = X.drop('DepTime', axis=1)
 
